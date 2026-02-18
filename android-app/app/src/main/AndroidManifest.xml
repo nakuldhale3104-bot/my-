@@ -5,9 +5,9 @@
 
     <application
         android:allowBackup="true"
-        android:label="Jewelry Promo"
+        android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+        android:theme="@style/Theme.JewelryPromo">
         <activity
             android:name=".ui.success.SuccessActivity"
             android:exported="false" />

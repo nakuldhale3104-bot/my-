@@ -14,6 +14,9 @@ android {
         versionCode 1
         versionName "1.0"
 
+        // Change for your backend machine IP on the same network as the tablet
+        buildConfigField "String", "BASE_URL", "\"http://192.168.1.100:4000/\""
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -56,8 +59,6 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
 
-    // Scratch card UI
-    implementation 'com.github.AnupKumarPanwar:ScratchView:1.8.1'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'

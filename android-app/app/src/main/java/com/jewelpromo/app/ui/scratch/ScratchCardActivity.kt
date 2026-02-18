@@ -2,10 +2,11 @@ package com.jewelpromo.app.ui.scratch
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.jewelpromo.app.data.api.NetworkModule
 import com.jewelpromo.app.data.repository.PromoRepository
@@ -23,16 +24,13 @@ class ScratchCardActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityScratchCardBinding
+    private lateinit var viewModel: ScratchViewModel
+
     private var userId: Int = -1
     private var customerName: String = ""
     private var age: Int = 0
-    private lateinit var chances: List<Int>
+    private var chances: List<Int> = emptyList()
     private var latestRevealedDiscount = 0
-
-    private val viewModel: ScratchViewModel by viewModels {
-        val repo = PromoRepository(NetworkModule.promoApiService)
-        ScratchViewModelFactory(repo, chances)
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,12 +46,15 @@ class ScratchCardActivity : AppCompatActivity() {
             return
         }
 
+        viewModel = ViewModelProvider(
+            this,
+            ScratchViewModelFactory(PromoRepository(NetworkModule.promoApiService), chances),
+        )[ScratchViewModel::class.java]
+
         binding = ActivityScratchCardBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.scratchOverlay.setOnRevealListener {
-            onCardScratched()
-        }
+        binding.scratchOverlay.setOnRevealListener { onCardScratched() }
 
         observeUiState()
         renderAttempt(1)
@@ -67,22 +68,18 @@ class ScratchCardActivity : AppCompatActivity() {
             1 -> showChoiceDialog(
                 title = "You won $latestRevealedDiscount%!",
                 message = "Lock this in, or risk it for Chance 2? You will lose this discount if you continue.",
-                isFinalChoice = false,
             )
 
             2 -> showChoiceDialog(
                 title = "You won $latestRevealedDiscount%!",
                 message = "Lock it now, or take your final Chance 3?",
-                isFinalChoice = false,
             )
 
-            3 -> {
-                showFinalDialogAndSave(latestRevealedDiscount)
-            }
+            3 -> showFinalDialogAndSave(latestRevealedDiscount)
         }
     }
 
-    private fun showChoiceDialog(title: String, message: String, isFinalChoice: Boolean) {
+    private fun showChoiceDialog(title: String, message: String) {
         AlertDialog.Builder(this)
             .setTitle(title)
             .setMessage(message)
@@ -90,7 +87,7 @@ class ScratchCardActivity : AppCompatActivity() {
             .setPositiveButton("Lock It") { _, _ ->
                 viewModel.lockDiscount(userId, latestRevealedDiscount)
             }
-            .setNegativeButton(if (isFinalChoice) "Finish" else "Risk It") { _, _ ->
+            .setNegativeButton("Risk It") { _, _ ->
                 viewModel.riskNextChance()
                 binding.tvHiddenDiscount.text = "?%"
                 binding.scratchOverlay.resetScratch()
@@ -117,7 +114,7 @@ class ScratchCardActivity : AppCompatActivity() {
     private fun observeUiState() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
-                binding.progressSave.visibility = if (state.isSaving) android.view.View.VISIBLE else android.view.View.GONE
+                binding.progressSave.visibility = if (state.isSaving) View.VISIBLE else View.GONE
                 state.error?.let { Toast.makeText(this@ScratchCardActivity, it, Toast.LENGTH_LONG).show() }
 
                 if (state.isSaved) {
