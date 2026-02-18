@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <TextView
+        android:id="@+id/tvAttempt"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Attempt 1 of 3"
+        android:textSize="22sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/tvInstruction"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Scratch the card to reveal your discount"
+        android:textSize="16sp" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:layout_marginTop="24dp">
+
+        <TextView
+            android:id="@+id/tvHiddenDiscount"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_discount_card"
+            android:gravity="center"
+            android:text="?%"
+            android:textColor="@android:color/white"
+            android:textSize="48sp"
+            android:textStyle="bold" />
+
+        <com.jewelpromo.app.ui.common.ScratchCardView
+            android:id="@+id/scratchOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
+
+    <ProgressBar
+        android:id="@+id/progressSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal"
+        android:visibility="gone" />
+</LinearLayout>
