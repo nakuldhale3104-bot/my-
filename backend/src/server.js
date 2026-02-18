@@ -4,7 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-const db = require('./db');
+const { connection: db, dbPath } = require('./db');
 const {
   calculateAge,
   generateDiscountChances,
@@ -19,6 +19,36 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(morgan('combined'));
+
+async function ensureCustomersTable() {
+  try {
+    await db.query('SELECT TOP 1 ID FROM Customers');
+    console.log('Customers table check: already exists.');
+    return;
+  } catch (error) {
+    console.warn('Customers table check: table not found, creating it now.');
+  }
+
+  const createTableSql = `
+    CREATE TABLE Customers (
+      ID AUTOINCREMENT PRIMARY KEY,
+      FullName TEXT(255),
+      MobileNumber TEXT(50),
+      DOB DATETIME,
+      CalculatedAge INTEGER,
+      FinalDiscountPercent INTEGER,
+      VisitDate DATETIME DEFAULT Now()
+    )
+  `;
+
+  await db.execute(createTableSql);
+  console.log('Customers table created successfully.');
+}
+
+async function validateDatabaseOnStartup() {
+  console.log(`Using Access DB path: ${dbPath}`);
+  await ensureCustomersTable();
+}
 
 app.get('/health', (_req, res) => {
   res.status(200).json({ ok: true, service: 'jewel-promo-backend' });
@@ -115,6 +145,16 @@ app.use((_req, res) => {
   res.status(404).json({ error: 'Route not found.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    await validateDatabaseOnStartup();
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Server startup failed while validating database:', error);
+    process.exit(1);
+  }
+}
+
+startServer();

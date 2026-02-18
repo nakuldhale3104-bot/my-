@@ -20,6 +20,11 @@ npm start
 - `POST /api/register`
 - `POST /api/update-discount`
 
+### Backend startup DB behavior
+- Default DB path is `C:\JewelryPromoDB\jewelry_promo.accdb` (can be overridden by `ACCESS_DB_PATH`).
+- On server startup, backend checks whether `Customers` exists.
+- If `Customers` is missing, backend automatically creates it before accepting requests.
+
 ## 3) Android Setup (Ready-to-build project)
 ```bash
 cd android-app
